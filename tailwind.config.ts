@@ -11,6 +11,14 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        ink: "var(--ink)",
+        mist: "var(--mist)",
+        teal: "var(--teal)",
+        lime: "var(--lime)",
+      },
+      fontFamily: {
+        display: ["var(--font-display)", "sans-serif"],
+        body: ["var(--font-body)", "sans-serif"],
       },
     },
   },

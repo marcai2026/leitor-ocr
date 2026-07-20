@@ -1,205 +1,93 @@
-"use client";
+import Link from "next/link";
 
-import { useState } from "react";
-
-const Home = () => {
-  const [files, setFiles] = useState<File[]>([]);
-  const [extractedData, setExtractedData] = useState<Record<string, string>[]>(
-    []
-  );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = event.target.files;
-    if (selectedFiles) {
-      const validFiles = Array.from(selectedFiles).filter(
-        (file) =>
-          file.type === "application/pdf" || file.type.startsWith("image/")
-      );
-      if (validFiles.length > 0) {
-        setFiles(validFiles);
-        setExtractedData([]);
-        setError(null);
-      } else {
-        setFiles([]);
-        setError("Selecione arquivos PDF ou imagem (.png, .jpeg).");
-      }
-    }
-  };
-
-  const handleUpload = async () => {
-    setExtractedData([]);
-    if (files.length === 0) {
-      setError("Nenhum arquivo selecionado.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const formData = new FormData();
-      files.forEach((file) => formData.append("files", file));
-
-      const response = await fetch("/api/cnh", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao processar os documentos.");
-      }
-
-      const data = await response.json();
-
-      setExtractedData(parseExtractedData(data));
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Erro ao enviar os arquivos."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePreview = (file: File) => {
-    const fileURL = URL.createObjectURL(file);
-    window.open(fileURL, "_blank");
-  };
-
-  const parseExtractedData = (data: any) => {
-    if (!Array.isArray(data) || data.length === 0) {
-      return [{ Mensagem: "Nenhum dado extraído." }];
-    }
-
-    return data.flatMap((file: any) => {
-      if (!file?.documents?.length) {
-        return [{ Mensagem: "Nenhum dado extraído neste arquivo." }];
-      }
-
-      return file.documents.map((doc: any) => {
-        const fields = doc.fields || {};
-
-        const cleanValue = (value: string | undefined) => {
-          if (!value) return "Não encontrado";
-
-          const cleaned = value
-            .replace(
-              /(2 e 1|NOME E SOBRENOME|NOME|CPF|4d CPF|DATA NASCIMENTO|DATA EMISSÃO|4a DATA EMISSÃO|1º HABILITAÇÃO|1ª HABILITAÇÃO|VALIDADE|4b VALIDADE|5 N° REGISTRO|5 REGISTRO|Nº REGISTRO|S Nº REGISTRO| 5 Nº REGISTRO|DOC\.IDENTIDADE|3 DATA, LOCAL E UF DE NASCIMENTO|ORG\.EMISSOR|4c DOC\. IDENTIDADE \/ ORG\. EMISSOR \/ UF|4c DOC IDENTIDADE \/ ÓRG EMISSOR \/ UF| 4c DOC\. IDENTIDADE \/ ÓRG\. EMISSOR \/ UF|4€ DOC IDENTIDADE \/ ÓRG EMISSOR \/ UF|FILIAÇÃO)[^A-Za-z0-9]*/gi,
-              ""
-            )
-            .trim();
-
-          return cleaned || "Não encontrado";
-        };
-
-        return {
-          Nome: cleanValue(fields["Nome e Sobrenome"]?.valueString),
-          CPF: cleanValue(fields["CPF"]?.valueString),
-          "Data de Nascimento": cleanValue(fields["Nascimento"]?.valueString),
-          "Data de Emissão": cleanValue(fields["Data de Emissão"]?.valueString),
-          "Primeira Habilitação": cleanValue(
-            fields["Primeira Habilitação"]?.valueString
-          ),
-          Validade: cleanValue(fields["Validade"]?.valueString),
-          Registro: cleanValue(fields["Registro"]?.valueString),
-          "Documento de Identidade": cleanValue(
-            fields["Doc identidade"]?.valueString
-          ),
-          Filiação: cleanValue(fields["Filiação"]?.valueString),
-        };
-      });
-    });
-  };
-
+export default function HomePage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <h1 className="text-2xl font-bold mb-4">Upload de Arquivos</h1>
-
-      <input
-        type="file"
-        accept=".pdf,.png,.jpeg,.jpg"
-        multiple
-        onChange={handleFileChange}
-        className="border p-2 rounded-md bg-white shadow-md"
+    <main className="site-grid relative min-h-[calc(100vh-73px)] overflow-hidden">
+      <div
+        className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-[var(--teal-bright)]/20 blur-3xl"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 rounded-full bg-[var(--lime)]/25 blur-3xl"
+        aria-hidden
       />
 
-      {files.length > 0 && (
-        <div className="mt-2">
-          <h2 className="font-bold">Arquivos Selecionados:</h2>
-          <ul className="space-y-2">
-            {files.map((file, index) => (
-              <li key={index} className="text-sm text-gray-700">
-                {file.name}{" "}
-                <button
-                  onClick={() => handlePreview(file)}
-                  className="text-blue-500 underline ml-2"
-                >
-                  Visualizar
-                </button>
-              </li>
-            ))}
-          </ul>
+      <section className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-6xl items-center gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-0">
+        <div className="relative z-10">
+          <p className="animate-rise font-display text-5xl font-extrabold tracking-tight text-[var(--ink)] sm:text-6xl md:text-7xl">
+            Poc
+          </p>
+
+          <h1 className="animate-rise-delay mt-5 max-w-xl font-display text-3xl font-bold leading-tight text-[var(--ink)] sm:text-4xl">
+            Documentos lidos. Tipos identificados.
+          </h1>
+
+          <p className="animate-rise-delay-2 mt-4 max-w-md text-base leading-relaxed text-[var(--ink-soft)] sm:text-lg">
+            Classifique notas, comprovantes e solicitações — ou extraia dados
+            da CNH — com Azure Document Intelligence.
+          </p>
+
+          <div className="animate-rise-delay-2 mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/classificar"
+              className="inline-flex items-center justify-center rounded-md bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-[var(--lime)] transition hover:bg-[var(--ink-soft)]"
+            >
+              Classificar documentos
+            </Link>
+            <Link
+              href="/cnh"
+              className="inline-flex items-center justify-center rounded-md border border-[var(--ink)]/20 bg-white/60 px-5 py-3 text-sm font-semibold text-[var(--ink)] transition hover:border-[var(--teal)] hover:bg-white"
+            >
+              Extrair CNH
+            </Link>
+          </div>
         </div>
-      )}
 
-      <button
-        onClick={handleUpload}
-        disabled={loading}
-        className={`mt-4 px-4 py-2 rounded-md shadow-md text-white ${
-          loading
-            ? "bg-gray-500 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700"
-        }`}
-      >
-        {loading ? "Processando..." : "Extrair Dados"}
-      </button>
+        <div
+          className="animate-rise-delay relative mx-auto w-full max-w-md lg:max-w-none"
+          aria-hidden
+        >
+          <div className="animate-float-doc relative aspect-[4/5] w-full">
+            <div className="absolute inset-x-[12%] top-[8%] bottom-[4%] rotate-3 rounded-sm bg-white/40 shadow-[0_20px_50px_rgba(16,35,31,0.12)]" />
+            <div className="absolute inset-x-[8%] top-[4%] bottom-[8%] -rotate-2 rounded-sm bg-white/70 shadow-[0_16px_40px_rgba(16,35,31,0.1)]" />
 
-      {error && (
-        <div className="mt-4 p-4 bg-red-100 text-red-800 rounded-md">
-          {error}
-        </div>
-      )}
-
-      {extractedData.length > 0 && (
-        <div className="mt-4 space-y-6 w-full max-w-2xl">
-          {extractedData.map((data, index) => {
-            const isExpired =
-              data.Validade && data.Validade !== "Não encontrado"
-                ? new Date(data.Validade.split("/").reverse().join("-")) <
-                  new Date()
-                : null;
-
-            return (
-              <div
-                key={index}
-                className="p-4 bg-white shadow-md rounded-md w-full"
-              >
-                <div className="w-full flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-bold">Documento {index + 1}</h2>
-                  <div
-                    className={`w-fit font-bold px-4 py-2 rounded-sm text-white ${
-                      isExpired ? "bg-red-600" : "bg-green-600"
-                    }`}
-                  >
-                    {isExpired ? "Vencido" : "Válido"}
-                  </div>
-                </div>
-                <ul className="list-disc pl-5 space-y-2">
-                  {Object.entries(data).map(([key, value]) => (
-                    <li key={key}>
-                      <strong>{key}:</strong> {value}
-                    </li>
-                  ))}
-                </ul>
+            <div className="absolute inset-x-[4%] inset-y-[2%] overflow-hidden rounded-sm bg-[#fbfcfb] shadow-[0_24px_60px_rgba(16,35,31,0.16)] ring-1 ring-[var(--ink)]/10">
+              <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
+                <span className="font-display text-lg font-bold text-[var(--ink)]">
+                  Poc
+                </span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--teal)]">
+                  Scan
+                </span>
               </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
 
-export default Home;
+              <div className="space-y-3 px-5 py-6">
+                <div className="h-3 w-2/3 rounded-sm bg-[var(--ink)]/15" />
+                <div className="h-3 w-full rounded-sm bg-[var(--ink)]/10" />
+                <div className="h-3 w-5/6 rounded-sm bg-[var(--ink)]/10" />
+                <div className="mt-6 grid grid-cols-2 gap-3">
+                  <div className="h-16 rounded-sm bg-[var(--mist)]" />
+                  <div className="h-16 rounded-sm bg-[var(--mist)]" />
+                </div>
+                <div className="mt-4 h-3 w-3/4 rounded-sm bg-[var(--ink)]/10" />
+                <div className="h-3 w-full rounded-sm bg-[var(--ink)]/8" />
+                <div className="h-3 w-4/5 rounded-sm bg-[var(--ink)]/10" />
+              </div>
+
+              <div className="absolute inset-x-0 top-0 h-1/3 overflow-hidden">
+                <div className="animate-scan absolute inset-x-0 h-16 bg-gradient-to-b from-transparent via-[var(--teal-bright)]/35 to-transparent" />
+              </div>
+
+              <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between rounded-md bg-[var(--ink)] px-4 py-3 text-sm text-white">
+                <span className="font-medium">Nota fiscal</span>
+                <span className="animate-pulse-soft text-[var(--lime)]">
+                  92%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}

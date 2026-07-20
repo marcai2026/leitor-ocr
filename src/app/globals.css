@@ -3,17 +3,116 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --ink: #10231f;
+  --ink-soft: #2a403a;
+  --mist: #e8f0ed;
+  --paper: #f4f7f5;
+  --teal: #0f766e;
+  --teal-bright: #14b8a6;
+  --lime: #b8e06a;
+  --line: rgba(16, 35, 31, 0.12);
+  --background: var(--paper);
+  --foreground: var(--ink);
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-body), sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), sans-serif;
+}
+
+.site-grid {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(180deg, rgba(232, 240, 237, 0.9), rgba(244, 247, 245, 0.4)),
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: auto, 48px 48px, 48px 48px;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scan-sweep {
+  0% {
+    transform: translateY(-20%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(120%);
+    opacity: 0;
+  }
+}
+
+@keyframes float-doc {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-1deg);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.animate-rise {
+  animation: rise-in 0.7s ease-out both;
+}
+
+.animate-rise-delay {
+  animation: rise-in 0.7s ease-out 0.15s both;
+}
+
+.animate-rise-delay-2 {
+  animation: rise-in 0.7s ease-out 0.3s both;
+}
+
+.animate-scan {
+  animation: scan-sweep 3.2s ease-in-out infinite;
+}
+
+.animate-float-doc {
+  animation: float-doc 5s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-rise-delay,
+  .animate-rise-delay-2,
+  .animate-scan,
+  .animate-float-doc,
+  .animate-pulse-soft {
+    animation: none;
+  }
 }
