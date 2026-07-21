@@ -13,14 +13,11 @@ export default function SiteHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="relative z-20 border-b border-[var(--line)] bg-[rgba(244,247,245,0.85)] backdrop-blur-md">
+    <header className="relative z-20 shrink-0 border-b border-[var(--line)] bg-[rgba(244,247,245,0.85)] backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <Link href="/" className="group flex items-baseline gap-2">
+        <Link href="/" className="group flex items-baseline">
           <span className="font-display text-2xl font-bold tracking-tight text-[var(--ink)]">
-            Poc
-          </span>
-          <span className="hidden text-xs uppercase tracking-[0.18em] text-[var(--ink-soft)] sm:inline">
-            Doc Intelligence
+            Logo.
           </span>
         </Link>
 

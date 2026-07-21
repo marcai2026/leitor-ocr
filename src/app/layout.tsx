@@ -16,9 +16,9 @@ const body = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Poc — Document Intelligence",
+  title: "Logo.",
   description:
-    "Classifique e extraia dados de documentos com Azure Document Intelligence.",
+    "Plataforma de leitura documental: classifique, extraia e valide dados de documentos com precisão.",
 };
 
 export default function RootLayout({

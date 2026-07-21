@@ -9,8 +9,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Nenhum arquivo enviado" }, { status: 400 });
     }
 
-    const endpoint = process.env.AZURE_ENDPOINT;
-    const apiKey = process.env.AZURE_API_KEY;
+    const endpoint = (process.env.AZURE_ENDPOINT || "").replace(/\/$/, "");
+    const apiKey = process.env.AZURE_API_KEY || "";
     const modelId = "cnh";
     const url = `${endpoint}/documentintelligence/documentModels/${modelId}:analyze?api-version=2024-11-30`;
 
@@ -22,10 +22,10 @@ export async function POST(req: Request) {
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          "Ocp-Apim-Subscription-Key": apiKey || "",
+          "Ocp-Apim-Subscription-Key": apiKey,
           "Content-Type": "application/octet-stream",
         },
-        body: Buffer.from(fileBuffer),
+        body: fileBuffer,
       });
 
       if (response.status === 202) {
@@ -33,13 +33,13 @@ export async function POST(req: Request) {
           response.headers.get("Operation-Location") || response.headers.get("operation-location");
 
         if (operationLocation) {
-          const analysisResults = await pollForAnalysisResults(operationLocation, apiKey || "");
+          const analysisResults = await pollForAnalysisResults(operationLocation, apiKey);
           results.push(analysisResults);
         } else {
           return NextResponse.json({ error: "Operation-Location não encontrado" }, { status: 500 });
         }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => null);
         results.push({ error: "Erro na requisição de análise", details: errorData });
       }
     }
@@ -52,11 +52,10 @@ export async function POST(req: Request) {
 }
 
 async function pollForAnalysisResults(operationLocation: string, apiKey: string) {
-  let status = "running";
-  let analysisResults = null;
+  const maxAttempts = 60;
 
-  while (status === "running") {
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 800 : 1500));
 
     const response = await fetch(operationLocation, {
       headers: {
@@ -69,14 +68,16 @@ async function pollForAnalysisResults(operationLocation: string, apiKey: string)
     }
 
     const data = await response.json();
-    status = data.status;
+    const status = String(data.status || "").toLowerCase();
 
     if (status === "succeeded") {
-      analysisResults = data.analyzeResult;
-    } else if (status === "failed") {
+      return data.analyzeResult;
+    }
+
+    if (status === "failed") {
       return { error: "Análise falhou", details: data };
     }
   }
 
-  return analysisResults;
+  return { error: "Timeout ao aguardar análise" };
 }

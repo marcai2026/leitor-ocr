@@ -202,7 +202,6 @@ function normalizeClassification(analysisResults: any) {
       confidence,
       valido: false,
       docType,
-      error: `Confiança ${(confidence * 100).toFixed(1)}% abaixo do limiar de ${CONFIDENCE_THRESHOLD * 100}%`,
     };
   }
 

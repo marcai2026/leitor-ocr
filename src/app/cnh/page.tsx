@@ -114,7 +114,7 @@ const CnhPage = () => {
   };
 
   return (
-    <main className="site-grid min-h-[calc(100vh-73px)] px-4 py-8 sm:px-6">
+    <main className="site-grid min-h-full overflow-y-auto px-4 py-8 sm:px-6">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--teal)]">
