@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type ItemStatus = "pending" | "classifying" | "done" | "error";
 type ExtractStatus = "idle" | "extracting" | "done" | "error";
@@ -270,10 +270,17 @@ function isComprovanteModal(item: ClassificationItem) {
   );
 }
 
-function openFilePreview(file: File) {
-  const url = URL.createObjectURL(file);
-  window.open(url, "_blank", "noopener,noreferrer");
-  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+function isPdfFile(file: File) {
+  return (
+    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+  );
+}
+
+function isImageFile(file: File) {
+  return (
+    file.type.startsWith("image/") ||
+    /\.(png|jpe?g|webp|gif)$/i.test(file.name)
+  );
 }
 
 const ClassificarPage = () => {
@@ -282,10 +289,34 @@ const ClassificarPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalItemId, setModalItemId] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const modalItem = items.find((item) => item.id === modalItemId) || null;
+
+  useEffect(() => {
+    if (!previewFile) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(previewFile);
+    setPreviewUrl(url);
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [previewFile]);
+
+  const openFilePreview = (file: File) => {
+    setPreviewFile(file);
+  };
+
+  const closeFilePreview = () => {
+    setPreviewFile(null);
+  };
 
   const getFieldValue = (key: string) => {
     const value =
@@ -858,6 +889,80 @@ const ClassificarPage = () => {
                     ? "Validar no portal nacional"
                     : "Validar no GISS"}
                 </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {previewFile && previewUrl && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 p-4"
+          onClick={closeFilePreview}
+          role="presentation"
+        >
+          <div
+            className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-md bg-white shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="file-preview-title"
+          >
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--line)] px-5 py-3">
+              <h2
+                id="file-preview-title"
+                className="min-w-0 truncate font-display text-base font-bold text-[var(--ink)]"
+                title={previewFile.name}
+              >
+                {previewFile.name}
+              </h2>
+              <button
+                type="button"
+                onClick={closeFilePreview}
+                className="shrink-0 rounded-md p-2 text-[var(--ink-soft)] transition hover:bg-[var(--mist)] hover:text-[var(--ink)]"
+                title="Fechar"
+                aria-label="Fechar"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            <div className="min-h-0 flex-1 bg-[var(--mist)]/40">
+              {isImageFile(previewFile) ? (
+                <div className="flex h-full items-center justify-center overflow-auto p-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={previewUrl}
+                    alt={previewFile.name}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+              ) : isPdfFile(previewFile) ? (
+                <object
+                  data={`${previewUrl}#toolbar=1&navpanes=0`}
+                  type="application/pdf"
+                  className="h-full w-full"
+                  aria-label={previewFile.name}
+                >
+                  <iframe
+                    src={`${previewUrl}#toolbar=1&navpanes=0`}
+                    title={previewFile.name}
+                    className="h-full w-full border-0"
+                  />
+                </object>
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
+                  <p className="text-sm text-[var(--ink-soft)]">
+                    Pré-visualização não disponível para este tipo de arquivo.
+                  </p>
+                  <a
+                    href={previewUrl}
+                    download={previewFile.name}
+                    className="rounded-md bg-[var(--ink)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--ink-soft)]"
+                  >
+                    Baixar arquivo
+                  </a>
+                </div>
               )}
             </div>
           </div>
