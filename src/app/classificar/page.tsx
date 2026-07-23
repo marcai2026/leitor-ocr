@@ -644,6 +644,7 @@ const ClassificarPage = () => {
                       {statusLabel(item)}
                     </span>
 
+                    {/* Temporariamente desativado — preview de arquivo
                     <button
                       type="button"
                       onClick={() => openFilePreview(item.file)}
@@ -653,6 +654,7 @@ const ClassificarPage = () => {
                     >
                       <FileIcon />
                     </button>
+                    */}
 
                     {canExtract(item) && (
                       <>
@@ -746,6 +748,7 @@ const ClassificarPage = () => {
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-1">
+                {/* Temporariamente desativado — preview de arquivo
                 <button
                   type="button"
                   onClick={() => openFilePreview(modalItem.file)}
@@ -755,6 +758,7 @@ const ClassificarPage = () => {
                 >
                   <FileIcon />
                 </button>
+                */}
                 <button
                   type="button"
                   onClick={closeModal}
