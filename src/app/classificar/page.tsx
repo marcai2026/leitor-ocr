@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PdfPreview from "@/components/PdfPreview";
 
 type ItemStatus = "pending" | "classifying" | "done" | "error";
 type ExtractStatus = "idle" | "extracting" | "done" | "error";
@@ -297,7 +298,7 @@ const ClassificarPage = () => {
   const modalItem = items.find((item) => item.id === modalItemId) || null;
 
   useEffect(() => {
-    if (!previewFile) {
+    if (!previewFile || !isImageFile(previewFile)) {
       setPreviewUrl(null);
       return;
     }
@@ -895,7 +896,7 @@ const ClassificarPage = () => {
         </div>
       )}
 
-      {previewFile && previewUrl && (
+      {previewFile && (
         <div
           className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 p-4"
           onClick={closeFilePreview}
@@ -928,7 +929,7 @@ const ClassificarPage = () => {
             </div>
 
             <div className="min-h-0 flex-1 bg-[var(--mist)]/40">
-              {isImageFile(previewFile) ? (
+              {isImageFile(previewFile) && previewUrl ? (
                 <div className="flex h-full items-center justify-center overflow-auto p-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -938,30 +939,12 @@ const ClassificarPage = () => {
                   />
                 </div>
               ) : isPdfFile(previewFile) ? (
-                <object
-                  data={`${previewUrl}#toolbar=1&navpanes=0`}
-                  type="application/pdf"
-                  className="h-full w-full"
-                  aria-label={previewFile.name}
-                >
-                  <iframe
-                    src={`${previewUrl}#toolbar=1&navpanes=0`}
-                    title={previewFile.name}
-                    className="h-full w-full border-0"
-                  />
-                </object>
+                <PdfPreview file={previewFile} />
               ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
                   <p className="text-sm text-[var(--ink-soft)]">
                     Pré-visualização não disponível para este tipo de arquivo.
                   </p>
-                  <a
-                    href={previewUrl}
-                    download={previewFile.name}
-                    className="rounded-md bg-[var(--ink)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--ink-soft)]"
-                  >
-                    Baixar arquivo
-                  </a>
                 </div>
               )}
             </div>
