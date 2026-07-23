@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     const modelId = "ext-cp-v1";
     const url = `${endpoint}/documentintelligence/documentModels/${modelId}:analyze?api-version=2024-11-30`;
 
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const fileBuffer = await file.arrayBuffer();
 
     const response = await fetch(url, {
       method: "POST",
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         "Ocp-Apim-Subscription-Key": apiKey,
         "Content-Type": "application/octet-stream",
       },
-      body: fileBuffer,
+      body: new Uint8Array(fileBuffer) as BodyInit,
     });
 
     if (response.status === 202) {

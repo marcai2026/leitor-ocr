@@ -166,6 +166,42 @@ function ViewIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function CloseIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+function FileIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+    </svg>
+  );
+}
+
 function isAllowedFile(file: File) {
   const name = file.name.toLowerCase();
   return ALLOWED_EXTENSIONS.some((ext) => name.endsWith(ext));
@@ -175,6 +211,8 @@ function statusLabel(item: ClassificationItem) {
   if (item.status === "classifying") return "Classificando...";
   if (item.status === "pending") return "Aguardando";
   if (item.status === "error") return item.error || "Erro";
+  const tipo = normalizeTipo(item.tipo);
+  if (tipo === "recibo") return "Recibo de comprovante";
   return item.label || "Inválido";
 }
 
@@ -203,7 +241,8 @@ function isComprovantePagamento(item: ClassificationItem) {
   const isCp =
     tipo === "comprovante_pagamento" ||
     tipo === "comprovante_de_pagamento" ||
-    tipo === "comprovante";
+    tipo === "comprovante" ||
+    tipo === "recibo";
 
   return (
     item.status === "done" &&
@@ -226,8 +265,15 @@ function isComprovanteModal(item: ClassificationItem) {
   return (
     tipo === "comprovante_pagamento" ||
     tipo === "comprovante_de_pagamento" ||
-    tipo === "comprovante"
+    tipo === "comprovante" ||
+    tipo === "recibo"
   );
+}
+
+function openFilePreview(file: File) {
+  const url = URL.createObjectURL(file);
+  window.open(url, "_blank", "noopener,noreferrer");
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 const ClassificarPage = () => {
@@ -566,6 +612,16 @@ const ClassificarPage = () => {
                       {statusLabel(item)}
                     </span>
 
+                    <button
+                      type="button"
+                      onClick={() => openFilePreview(item.file)}
+                      className="rounded-md border border-[var(--line)] bg-white p-2 text-[var(--ink-soft)] transition hover:border-[var(--teal)]/50 hover:bg-[var(--mist)] hover:text-[var(--ink)]"
+                      title="Visualizar arquivo"
+                      aria-label="Visualizar arquivo"
+                    >
+                      <FileIcon />
+                    </button>
+
                     {canExtract(item) && (
                       <>
                         <button
@@ -610,10 +666,10 @@ const ClassificarPage = () => {
                           }`}
                           title={
                             item.extractStatus === "done"
-                              ? "Visualizar"
+                              ? "Ver dados extraídos"
                               : "Colete os dados antes de visualizar"
                           }
-                          aria-label="Visualizar"
+                          aria-label="Ver dados extraídos"
                         >
                           <ViewIcon />
                         </button>
@@ -641,7 +697,7 @@ const ClassificarPage = () => {
             aria-labelledby="extract-modal-title"
           >
             <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--line)] px-5 py-4">
-              <div>
+              <div className="min-w-0 flex-1">
                 <h2
                   id="extract-modal-title"
                   className="font-display text-xl font-bold text-[var(--ink)]"
@@ -650,17 +706,33 @@ const ClassificarPage = () => {
                     ? "Dados do comprovante"
                     : "Dados da nota fiscal"}
                 </h2>
-                <p className="mt-1 text-xs text-[var(--ink-soft)]">
+                <p
+                  className="mt-1 truncate text-xs text-[var(--ink-soft)]"
+                  title={modalItem.file.name}
+                >
                   {modalItem.file.name}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={closeModal}
-                className="rounded-md px-2 py-1 text-sm text-[var(--ink-soft)] hover:bg-[var(--mist)]"
-              >
-                Fechar
-              </button>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => openFilePreview(modalItem.file)}
+                  className="rounded-md border border-[var(--line)] p-2 text-[var(--ink-soft)] transition hover:border-[var(--teal)]/50 hover:bg-[var(--mist)] hover:text-[var(--ink)]"
+                  title="Visualizar arquivo"
+                  aria-label="Visualizar arquivo"
+                >
+                  <FileIcon />
+                </button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="rounded-md p-2 text-[var(--ink-soft)] transition hover:bg-[var(--mist)] hover:text-[var(--ink)]"
+                  title="Fechar"
+                  aria-label="Fechar"
+                >
+                  <CloseIcon />
+                </button>
+              </div>
             </div>
 
             <div className="modal-scroll min-h-0 flex-1 overflow-y-auto px-5 py-4">

@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
     for (const file of files) {
       try {
-        const fileBuffer = Buffer.from(await file.arrayBuffer());
+        const fileBuffer = await file.arrayBuffer();
 
         const response = await fetch(url, {
           method: "POST",
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
             // Mesmo padrão da rota CNH — funciona melhor com PDF/imagem
             "Content-Type": "application/octet-stream",
           },
-          body: fileBuffer,
+          body: new Uint8Array(fileBuffer) as BodyInit,
         });
 
         if (response.status === 202) {
@@ -124,6 +124,9 @@ function invalidResult(fileName: string, error: string, details?: unknown) {
 }
 
 function formatLabel(docType: string) {
+  const normalized = docType.toLowerCase().replace(/[\s-]+/g, "_");
+  if (normalized === "recibo") return "Recibo de comprovante";
+
   return docType
     .split("_")
     .filter(Boolean)
