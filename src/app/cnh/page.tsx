@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { apiRoutes } from "@/lib/api";
 
 const CnhPage = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -42,7 +43,7 @@ const CnhPage = () => {
       const formData = new FormData();
       files.forEach((file) => formData.append("files", file));
 
-      const response = await fetch("/api/cnh", {
+      const response = await fetch(apiRoutes.extractCnh(), {
         method: "POST",
         body: formData,
       });

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PdfPreview from "@/components/PdfPreview";
+import { apiRoutes } from "@/lib/api";
 
 type ItemStatus = "pending" | "classifying" | "done" | "error";
 type ExtractStatus = "idle" | "extracting" | "done" | "error";
@@ -415,7 +416,7 @@ const ClassificarPage = () => {
       const formData = new FormData();
       items.forEach((item) => formData.append("files", item.file));
 
-      const response = await fetch("/api/classificar", {
+      const response = await fetch(apiRoutes.classify(), {
         method: "POST",
         body: formData,
       });
@@ -478,7 +479,7 @@ const ClassificarPage = () => {
     if (!item || !canExtract(item)) return;
 
     const isNf = isNotaFiscal(item);
-    const endpoint = isNf ? "/api/extrair-nf" : "/api/extrair-cp";
+    const endpoint = isNf ? apiRoutes.extractNf() : apiRoutes.extractCp();
     const errorFallback = isNf
       ? "Erro ao coletar dados da NF."
       : "Erro ao coletar dados do comprovante.";
